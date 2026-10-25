@@ -70,6 +70,8 @@ public sealed class ButtonsService
         item.Model = observation.Model ?? item.Model;
         item.Mac = observation.Mac ?? item.Mac;
         item.IsInPairingMode = observation.IsInPairingMode ?? item.IsInPairingMode;
+        if (item.Mac is { } mac)
+            _ = scanner.WatchAsync(mac);
 
         switch (observation.Reading)
         {
