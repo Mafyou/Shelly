@@ -1,0 +1,124 @@
+<ContentPage x:Class="ShellyBLE.Views.ButtonsPage"
+             xmlns:vm="clr-namespace:ShellyBLE.ViewModels"
+             xmlns:m="clr-namespace:ShellyBLE.Models"
+             xmlns:v="clr-namespace:ShellyBLE.Views"
+             x:DataType="vm:ButtonsViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- En-tête : titre, état de l'écoute, accès au mode affichage -->
+        <Grid Padding="20,24,12,12" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="4">
+            <Label Text="Boutons" Style="{StaticResource Display}" />
+            <HorizontalStackLayout Grid.Row="1" Spacing="6" Margin="0,4,0,0">
+                <Ellipse WidthRequest="8" HeightRequest="8" VerticalOptions="Center"
+                         Fill="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}">
+                    <Ellipse.Triggers>
+                        <DataTrigger TargetType="Ellipse" Binding="{Binding IsScanning}" Value="True">
+                            <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                        </DataTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                <Label Text="{Binding Status}" Style="{StaticResource Caption}" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <Button Grid.Column="1" Grid.RowSpan="2" Text="{x:Static v:Icons.Dashboard}" FontFamily="Icons" FontSize="22"
+                    Style="{StaticResource SecondaryButton}" WidthRequest="48" HeightRequest="48" Padding="0"
+                    Command="{Binding OpenLiveModeCommand}" SemanticProperties.Description="Mode affichage" />
+            <Button Grid.Column="2" Grid.RowSpan="2" FontFamily="Icons" FontSize="22"
+                    Style="{StaticResource SecondaryButton}" WidthRequest="48" HeightRequest="48" Padding="0"
+                    Command="{Binding ToggleScanCommand}" SemanticProperties.Description="{Binding ScanActionText}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsScanning}" Value="True">
+                        <Setter Property="Text" Value="{x:Static v:Icons.Stop}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsScanning}" Value="False">
+                        <Setter Property="Text" Value="{x:Static v:Icons.Radar}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </Grid>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Buttons}" SelectionMode="None" Margin="16,0">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="24,64" Spacing="12" HorizontalOptions="Center">
+                    <Border Style="{StaticResource Avatar}" WidthRequest="88" HeightRequest="88" StrokeShape="RoundRectangle 44" HorizontalOptions="Center">
+                        <Label Text="{x:Static v:Icons.Radar}" Style="{StaticResource AccentIcon}" FontSize="44" />
+                    </Border>
+                    <Label Text="À l'écoute des boutons" Style="{StaticResource Title}" HorizontalTextAlignment="Center" />
+                    <Label Text="Appuyez sur votre Shelly BLU Button : il apparaît ici dès qu'il émet."
+                           Style="{StaticResource Caption}" HorizontalTextAlignment="Center" MaximumWidthRequest="300" />
+                    <Label Text="Pour le configurer, maintenez-le 10 s jusqu'au clignotement bleu."
+                           Style="{StaticResource Caption}" HorizontalTextAlignment="Center" MaximumWidthRequest="300" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="m:ButtonItem">
+                    <Border Style="{StaticResource Card}" Margin="0,6">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnButtonTapped" />
+                        </Border.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="14" RowSpacing="8">
+                            <!-- Avatar : coloré tant que le bouton émet -->
+                            <Border Grid.RowSpan="2" Style="{StaticResource Avatar}" VerticalOptions="Start">
+                                <Label Text="{x:Static v:Icons.TapButton}" Style="{StaticResource Icon}" FontSize="22">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsLive}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                <Label Text="{Binding DisplayName}" Style="{StaticResource Title}" LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding Subtitle}" Style="{StaticResource Caption}" LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="{x:Static v:Icons.ChevronRight}" Style="{StaticResource Icon}" />
+
+                            <!-- Puces d'état -->
+                            <FlexLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Wrap="Wrap" AlignItems="Start">
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="{Binding BatteryIcon}" Style="{StaticResource ChipIcon}" />
+                                        <Label Text="{Binding BatteryText}" Style="{StaticResource ChipText}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="{Binding SignalIcon}" Style="{StaticResource ChipIcon}" />
+                                        <Label Text="{Binding SignalText}" Style="{StaticResource ChipText}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="{Binding SecurityIcon}" Style="{StaticResource ChipIcon}" />
+                                        <Label Text="{Binding SecurityText}" Style="{StaticResource ChipText}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource Chip}" Margin="0,0,6,6" IsVisible="{Binding IsInPairingMode}">
+                                    <HorizontalStackLayout Spacing="4">
+                                        <Label Text="{x:Static v:Icons.Bluetooth}" Style="{StaticResource ChipIcon}" />
+                                        <Label Text="Appairage" Style="{StaticResource ChipText}" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </FlexLayout>
+
+                            <!-- Dernier appui, ou problème de décodage -->
+                            <BoxView Grid.Row="2" Grid.ColumnSpan="3" Style="{StaticResource Divider}" VerticalOptions="Start" Margin="0,-2,0,0" />
+                            <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="3" Spacing="8" Margin="0,10,0,0">
+                                <Label Text="{Binding LastPressIcon}" Style="{StaticResource AccentIcon}" FontSize="18" />
+                                <Label Text="{Binding LastPressText}" Style="{StaticResource Body}" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Status}" IsVisible="{Binding HasStatus}"
+                                   FontSize="12.5" Margin="0,36,0,0"
+                                   TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

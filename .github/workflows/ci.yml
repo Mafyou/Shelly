@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  core:
+    name: Core (tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # SDK préversion épinglé par global.json.
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Microsoft.Testing.Platform (section "test" de global.json) : dotnet test --project.
+      - run: dotnet test --project tests/ShellyBLE.Core.Tests -c Release
+
+  android:
+    name: Android (build)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - run: dotnet workload install maui-android
+
+      # Installe la plateforme Android visée par le TFM si l'image du runner ne l'a pas encore.
+      - run: >
+          dotnet build src/ShellyBLE/ShellyBLE.csproj -f net11.0-android
+          -t:InstallAndroidDependencies
+          -p:AndroidSdkDirectory="$env:ANDROID_SDK_ROOT"
+          -p:AcceptAndroidSDKLicenses=True
+
+      - run: >
+          dotnet build src/ShellyBLE/ShellyBLE.csproj -f net11.0-android -c Release
+          -p:AndroidSdkDirectory="$env:ANDROID_SDK_ROOT"

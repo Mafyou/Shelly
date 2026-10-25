@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ShellyBLE/ShellyBLE.csproj" />
+    <Project Path="src/ShellyBLE.Core/ShellyBLE.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ShellyBLE.Core.Tests/ShellyBLE.Core.Tests.csproj" />
+  </Folder>
+</Solution>

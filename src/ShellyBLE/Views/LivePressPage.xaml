@@ -1,0 +1,41 @@
+<ContentPage x:Class="ShellyBLE.Views.LivePressPage"
+             xmlns:vm="clr-namespace:ShellyBLE.ViewModels"
+             xmlns:m="clr-namespace:ShellyBLE.Models"
+             xmlns:v="clr-namespace:ShellyBLE.Views"
+             x:DataType="vm:LivePressViewModel"
+             Title="Mode affichage"
+             BackgroundColor="#05070B">
+
+    <Grid RowDefinitions="*,Auto,Auto" Padding="20">
+
+        <Border x:Name="Flash" Grid.RowSpan="3" Margin="-20" StrokeThickness="0" Opacity="0"
+                BackgroundColor="{StaticResource Accent}" InputTransparent="True" />
+
+        <!-- Dernier appui -->
+        <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+            <Label x:Name="IconLabel" Text="{Binding Icon}" FontFamily="Icons" FontSize="72" TextColor="{StaticResource Accent}" HorizontalTextAlignment="Center" />
+            <Label x:Name="WordLabel" Text="{Binding Word}" TextColor="White" FontAttributes="Bold" CharacterSpacing="2"
+                   FontSize="76" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+            <Label Text="{Binding Detail}" TextColor="#8B96A5" FontSize="16" HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <!-- Derniers appuis -->
+        <HorizontalStackLayout Grid.Row="1" BindableLayout.ItemsSource="{Binding Recent}" Spacing="8" HorizontalOptions="Center" Margin="0,0,0,20">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="m:PressVisual">
+                    <Border Padding="10,6" StrokeThickness="0" StrokeShape="RoundRectangle 14" BackgroundColor="#161B22">
+                        <Label Text="{Binding Icon}" FontFamily="Icons" FontSize="18" TextColor="#8B96A5" />
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+
+        <!-- Couper le buzzer du bouton -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8">
+            <Label Text="{Binding MuteStatus}" TextColor="#8B96A5" FontSize="13" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding MuteStatus, Converter={StaticResource HasText}}" />
+            <Button Text="Couper le buzzer du bouton" TextColor="#8B96A5" BackgroundColor="Transparent" BorderColor="#2A313C" BorderWidth="1" CornerRadius="10"
+                    Command="{Binding MuteButtonCommand}" IsEnabled="{Binding IsMuting, Converter={StaticResource Not}}" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

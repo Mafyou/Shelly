@@ -1,0 +1,16 @@
+global using System.Buffers.Binary;
+global using System.Collections.Frozen;
+global using System.Collections.Immutable;
+global using System.Net;
+global using System.Security.Cryptography;
+global using System.Text;
+global using Moq;
+global using Moq.Protected;
+global using ShellyBLE.Core;
+global using ShellyBLE.Core.BTHome;
+global using ShellyBLE.Core.Buttons;
+global using ShellyBLE.Core.Gatt;
+global using ShellyBLE.Core.Shelly;
+global using Shouldly;
+global using Xunit;
+global using static ShellyBLE.Core.Tests.TestHelpers;

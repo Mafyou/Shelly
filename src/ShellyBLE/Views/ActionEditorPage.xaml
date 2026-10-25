@@ -1,0 +1,304 @@
+<ContentPage x:Class="ShellyBLE.Views.ActionEditorPage"
+             xmlns:vm="clr-namespace:ShellyBLE.ViewModels"
+             xmlns:core="clr-namespace:ShellyBLE.Core.Buttons;assembly=ShellyBLE.Core"
+             xmlns:v="clr-namespace:ShellyBLE.Views"
+             x:DataType="vm:ActionEditorViewModel"
+             Title="{Binding Visual.Title}">
+
+    <ContentPage.Resources>
+        <!-- Carte d'option sélectionnable -->
+        <Style x:Key="Option" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Padding" Value="14,12" />
+        </Style>
+        <Style x:Key="Segment" TargetType="Border">
+            <Setter Property="Padding" Value="0,9" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 9" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+        </Style>
+        <Style x:Key="SegmentText" TargetType="Label" BasedOn="{StaticResource Body}">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource Body}">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+        </Style>
+        <Style x:Key="Template" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="MinimumHeightRequest" Value="34" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,6,6" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
+
+                <!-- Type d'appui programmé -->
+                <Border Style="{StaticResource Card}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Border Style="{StaticResource Avatar}">
+                            <Label Text="{Binding Visual.Icon}" Style="{StaticResource AccentIcon}" FontSize="22" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                            <Label Text="{Binding Visual.Title}" Style="{StaticResource Title}" />
+                            <Label Text="{Binding Visual.Hint}" Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Choix du type d'action -->
+                <Label Text="Que doit-il se passer ?" Style="{StaticResource Section}" />
+
+                <Border Style="{StaticResource Option}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsNone}" Value="True">
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectKindCommand}" CommandParameter="{x:Static vm:ActionKind.None}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Label Text="{x:Static v:Icons.None}" Style="{StaticResource Icon}" FontSize="24" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                            <Label Text="Aucune action" Style="{StaticResource Title}" FontSize="15.5" />
+                            <Label Text="L'appui est seulement affiché et journalisé." Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Option}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsRelay}" Value="True">
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectKindCommand}" CommandParameter="{x:Static vm:ActionKind.ShellyRelay}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Label Text="{x:Static v:Icons.Power}" Style="{StaticResource AccentIcon}" FontSize="24" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                            <Label Text="Relais Shelly" Style="{StaticResource Title}" FontSize="15.5" />
+                            <Label Text="Simple : allumer, éteindre ou basculer un relais Shelly du réseau." Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Option}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsLink}" Value="True">
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectKindCommand}" CommandParameter="{x:Static vm:ActionKind.OpenLink}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Label Text="{x:Static v:Icons.QrCode}" Style="{StaticResource AccentIcon}" FontSize="24" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                            <Label Text="Ouvrir un lien" Style="{StaticResource Title}" FontSize="15.5" />
+                            <Label Text="Comme un QR code scanné : page web, application, appel, SMS, carte." Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Option}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsHttp}" Value="True">
+                            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectKindCommand}" CommandParameter="{x:Static vm:ActionKind.Http}" />
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Label Text="{x:Static v:Icons.Api}" Style="{StaticResource AccentIcon}" FontSize="24" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                            <Label Text="Requête HTTP" Style="{StaticResource Title}" FontSize="15.5" />
+                            <Label Text="Avancé : n'importe quelle URL, en GET ou en POST avec un corps." Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Réglages : relais Shelly -->
+                <VerticalStackLayout IsVisible="{Binding IsRelay}" Spacing="8">
+                    <Label Text="Relais" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Adresse du relais" Style="{StaticResource FieldLabel}" Margin="0" />
+                            <Border Style="{StaticResource Field}">
+                                <Entry Text="{Binding RelayHost}" Placeholder="192.168.1.50" Keyboard="Url" FontFamily="monospace" />
+                            </Border>
+                            <Label Text="Son adresse IP sur le réseau local (visible dans l'application Shelly ou la box)." Style="{StaticResource Caption}" />
+
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Margin="0,6,0,0">
+                                <Label Text="{Binding ChannelText}" Style="{StaticResource FieldLabel}" VerticalOptions="Center" Margin="0" />
+                                <Button Grid.Column="1" Text="−" FontSize="20" Style="{StaticResource SecondaryButton}" WidthRequest="48" Padding="0"
+                                        Command="{Binding ChangeChannelCommand}" CommandParameter="-1" SemanticProperties.Description="Canal précédent" />
+                                <Button Grid.Column="2" Text="+" FontSize="20" Style="{StaticResource SecondaryButton}" WidthRequest="48" Padding="0"
+                                        Command="{Binding ChangeChannelCommand}" CommandParameter="1" SemanticProperties.Description="Canal suivant" />
+                            </Grid>
+                            <Label Text="0 pour un relais simple ; 1, 2… pour les relais multiples (Plus 2PM, Pro 4PM…)." Style="{StaticResource Caption}" />
+
+                            <Label Text="Commande" Style="{StaticResource FieldLabel}" />
+                            <Border Padding="4" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}">
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                                    <Border Style="{StaticResource Segment}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsToggle}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectRelayCommandCommand}" CommandParameter="{x:Static core:ShellyRelayCommand.Toggle}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Basculer" Style="{StaticResource SegmentText}" />
+                                    </Border>
+                                    <Border Grid.Column="1" Style="{StaticResource Segment}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsOn}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectRelayCommandCommand}" CommandParameter="{x:Static core:ShellyRelayCommand.On}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Allumer" Style="{StaticResource SegmentText}" />
+                                    </Border>
+                                    <Border Grid.Column="2" Style="{StaticResource Segment}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsOff}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectRelayCommandCommand}" CommandParameter="{x:Static core:ShellyRelayCommand.Off}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="Éteindre" Style="{StaticResource SegmentText}" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                                <VerticalStackLayout Spacing="1">
+                                    <Label Text="Ancien modèle (Gen1)" Style="{StaticResource FieldLabel}" Margin="0" />
+                                    <Label Text="Shelly 1, 2.5… d'avant 2021 ; laisser désactivé pour les Plus, Pro et Gen3/Gen4." Style="{StaticResource Caption}" />
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1" IsToggled="{Binding IsGen1}" VerticalOptions="Center" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Réglages : lien -->
+                <VerticalStackLayout IsVisible="{Binding IsLink}" Spacing="8">
+                    <Label Text="Lien" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="8">
+                            <Border Style="{StaticResource Field}">
+                                <Entry Text="{Binding LinkUrl}" Placeholder="https://…" Keyboard="Url" FontFamily="monospace" />
+                            </Border>
+                            <FlexLayout Wrap="Wrap">
+                                <Button Text="Page web" Style="{StaticResource Template}" Command="{Binding UseLinkTemplateCommand}" CommandParameter="https://" />
+                                <Button Text="Appel" Style="{StaticResource Template}" Command="{Binding UseLinkTemplateCommand}" CommandParameter="tel:" />
+                                <Button Text="SMS" Style="{StaticResource Template}" Command="{Binding UseLinkTemplateCommand}" CommandParameter="sms:" />
+                                <Button Text="E-mail" Style="{StaticResource Template}" Command="{Binding UseLinkTemplateCommand}" CommandParameter="mailto:" />
+                                <Button Text="Carte" Style="{StaticResource Template}" Command="{Binding UseLinkTemplateCommand}" CommandParameter="geo:0,0?q=" />
+                            </FlexLayout>
+                            <Label Style="{StaticResource Caption}"
+                                   Text="Application ouverte, le lien s'ouvre aussitôt. En arrière-plan, Android l'interdit : une notification « toucher pour ouvrir » s'affiche." />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Réglages : requête HTTP -->
+                <VerticalStackLayout IsVisible="{Binding IsHttp}" Spacing="8">
+                    <Label Text="Requête" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="6">
+                            <Border Padding="4" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                                    <Border Style="{StaticResource Segment}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsGet}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectVerbCommand}" CommandParameter="{x:Static core:HttpVerb.Get}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="GET" Style="{StaticResource SegmentText}" />
+                                    </Border>
+                                    <Border Grid.Column="1" Style="{StaticResource Segment}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsPost}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectVerbCommand}" CommandParameter="{x:Static core:HttpVerb.Post}" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="POST" Style="{StaticResource SegmentText}" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Label Text="URL" Style="{StaticResource FieldLabel}" />
+                            <Border Style="{StaticResource Field}">
+                                <Entry Text="{Binding HttpUrl}" Placeholder="http://192.168.1.10/api/…" Keyboard="Url" FontFamily="monospace" />
+                            </Border>
+
+                            <VerticalStackLayout IsVisible="{Binding IsPost}" Spacing="6">
+                                <Label Text="Corps" Style="{StaticResource FieldLabel}" />
+                                <Border Style="{StaticResource Field}" Padding="12,6">
+                                    <Editor Text="{Binding HttpBody}" Placeholder="{}{&quot;on&quot;: true}" AutoSize="TextChanges" MinimumHeightRequest="90" FontFamily="monospace" />
+                                </Border>
+                                <Label Text="Type de contenu" Style="{StaticResource FieldLabel}" />
+                                <Border Style="{StaticResource Field}">
+                                    <Entry Text="{Binding HttpContentType}" FontFamily="monospace" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Ce qui sera envoyé -->
+                <Label Text="Ce qui sera envoyé" Style="{StaticResource Section}" />
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding Preview}" Style="{StaticResource Mono}" LineBreakMode="CharacterWrap" />
+                        <Label Text="{Binding ProblemText}" IsVisible="{Binding HasProblems}" FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                        <Label Text="{Binding TestResult}" IsVisible="{Binding TestResult, Converter={StaticResource HasText}}" FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding TestFailed}" Value="True">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Barre d'actions fixe -->
+        <Border Grid.Row="1" Padding="16,10,16,14" StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Text="Tester" Style="{StaticResource SecondaryButton}" Command="{Binding TestCommand}" IsEnabled="{Binding CanTest}" />
+                <Button Grid.Column="1" Text="Enregistrer" Command="{Binding SaveCommand}" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

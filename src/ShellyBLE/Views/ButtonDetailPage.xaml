@@ -1,0 +1,382 @@
+<ContentPage x:Class="ShellyBLE.Views.ButtonDetailPage"
+             xmlns:vm="clr-namespace:ShellyBLE.ViewModels"
+             xmlns:m="clr-namespace:ShellyBLE.Models"
+             xmlns:v="clr-namespace:ShellyBLE.Views"
+             x:DataType="vm:ButtonDetailViewModel"
+             Title="{Binding Item.DisplayName}">
+
+    <ContentPage.Resources>
+        <!-- Onglet du segment : fond accentué quand il est sélectionné -->
+        <Style x:Key="Segment" TargetType="Border">
+            <Setter Property="Padding" Value="0,9" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 9" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+        </Style>
+        <Style x:Key="SegmentText" TargetType="Label" BasedOn="{StaticResource Body}">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="SettingTitle" TargetType="Label" BasedOn="{StaticResource Body}">
+            <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Bandeau de retour d'opération -->
+        <Border Padding="16,10" StrokeThickness="0" IsVisible="{Binding HasFeedback}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HeightRequest="18" WidthRequest="18" />
+                <Label Text="{x:Static v:Icons.Info}" Style="{StaticResource AccentIcon}" FontSize="18" IsVisible="{Binding IsBusy, Converter={StaticResource Not}}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsProblem}" Value="True">
+                            <Setter Property="Text" Value="{x:Static v:Icons.Alert}" />
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Label Grid.Column="1" Text="{Binding FeedbackText}" Style="{StaticResource Body}" VerticalOptions="Center" LineBreakMode="WordWrap" />
+            </Grid>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="12">
+
+                <!-- En-tête du bouton -->
+                <Border Style="{StaticResource Card}">
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14" RowSpacing="10">
+                        <Border Grid.RowSpan="2" Style="{StaticResource Avatar}" WidthRequest="52" HeightRequest="52" StrokeShape="RoundRectangle 26" VerticalOptions="Start">
+                            <Label Text="{x:Static v:Icons.TapButton}" Style="{StaticResource Icon}" FontSize="26">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Item.IsLive}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                            <Label Text="{Binding Item.DisplayName}" Style="{StaticResource Title}" FontSize="19" />
+                            <Label Text="{Binding Item.Subtitle}" Style="{StaticResource Caption}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Text="{x:Static v:Icons.Pencil}" FontFamily="Icons" FontSize="18" Style="{StaticResource SecondaryButton}"
+                                WidthRequest="40" HeightRequest="40" Padding="0" VerticalOptions="Start"
+                                Command="{Binding RenameCommand}" SemanticProperties.Description="Renommer" />
+
+                        <FlexLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Wrap="Wrap">
+                            <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Item.BatteryIcon}" Style="{StaticResource ChipIcon}" />
+                                    <Label Text="{Binding Item.BatteryText}" Style="{StaticResource ChipText}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Item.SignalIcon}" Style="{StaticResource ChipIcon}" />
+                                    <Label Text="{Binding Item.SignalText}" Style="{StaticResource ChipText}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource Chip}" Margin="0,0,6,6">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Item.SecurityIcon}" Style="{StaticResource ChipIcon}" />
+                                    <Label Text="{Binding Item.SecurityText}" Style="{StaticResource ChipText}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </FlexLayout>
+                    </Grid>
+                </Border>
+
+                <Label Text="{Binding Item.Status}" IsVisible="{Binding Item.HasStatus}" FontSize="13" Margin="4,0"
+                       TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+
+                <!-- Segment d'onglets -->
+                <Border Padding="4" StrokeThickness="0" StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                        <Border Style="{StaticResource Segment}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsActivityTab}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:DetailTab.Activity}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Activité" Style="{StaticResource SegmentText}" />
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Segment}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsProgrammingTab}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:DetailTab.Programming}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Programmation" Style="{StaticResource SegmentText}" />
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource Segment}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsDeviceTab}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:DetailTab.Device}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Appareil" Style="{StaticResource SegmentText}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- ===== Activité ===== -->
+                <VerticalStackLayout IsVisible="{Binding IsActivityTab}" Spacing="8">
+                    <Border Style="{StaticResource Card}" Padding="8,4">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Item.Activity}">
+                            <BindableLayout.EmptyView>
+                                <VerticalStackLayout Padding="16,28" Spacing="8">
+                                    <Label Text="{x:Static v:Icons.History}" Style="{StaticResource Icon}" FontSize="36" />
+                                    <Label Text="Aucune activité pour l'instant" Style="{StaticResource Title}" HorizontalTextAlignment="Center" />
+                                    <Label Text="Les appuis et les actions déclenchées s'afficheront ici." Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="m:ActivityEntry">
+                                    <Grid ColumnDefinitions="36,*,Auto" Padding="8,10" ColumnSpacing="10">
+                                        <Label Text="{Binding Icon}" Style="{StaticResource Icon}" FontSize="22" VerticalOptions="Start">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Kind}" Value="{x:Static m:ActivityType.Press}">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Kind}" Value="{x:Static m:ActivityType.ActionSucceeded}">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding Kind}" Value="{x:Static m:ActivityType.ActionFailed}">
+                                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                            <Label Text="{Binding Title}" Style="{StaticResource Body}" />
+                                            <Label Text="{Binding Detail}" Style="{StaticResource Caption}" LineBreakMode="WordWrap"
+                                                   IsVisible="{Binding Detail, Converter={StaticResource HasText}}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="2" Text="{Binding TimeText}" Style="{StaticResource Caption}" VerticalOptions="Start" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- ===== Programmation ===== -->
+                <VerticalStackLayout IsVisible="{Binding IsProgrammingTab}" Spacing="8">
+                    <!-- Comment ça marche : du bouton à l'action -->
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Comment ça marche" Style="{StaticResource Title}" />
+                            <Grid ColumnDefinitions="*,Auto,*,Auto,*" ColumnSpacing="4">
+                                <VerticalStackLayout Spacing="4">
+                                    <Border Style="{StaticResource Avatar}" HorizontalOptions="Center">
+                                        <Label Text="{x:Static v:Icons.TapButton}" Style="{StaticResource AccentIcon}" />
+                                    </Border>
+                                    <Label Text="Bouton" Style="{StaticResource Body}" HorizontalTextAlignment="Center" FontFamily="OpenSansSemibold" />
+                                    <Label Text="Diffuse l'appui en Bluetooth" Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="{x:Static v:Icons.ChevronRight}" Style="{StaticResource Icon}" VerticalOptions="Start" Margin="0,12,0,0" />
+                                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                    <Border Style="{StaticResource Avatar}" HorizontalOptions="Center">
+                                        <Label Text="{x:Static v:Icons.Bluetooth}" Style="{StaticResource AccentIcon}" />
+                                    </Border>
+                                    <Label Text="Téléphone" Style="{StaticResource Body}" HorizontalTextAlignment="Center" FontFamily="OpenSansSemibold" />
+                                    <Label Text="Reconnaît le type d'appui" Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="3" Text="{x:Static v:Icons.ChevronRight}" Style="{StaticResource Icon}" VerticalOptions="Start" Margin="0,12,0,0" />
+                                <VerticalStackLayout Grid.Column="4" Spacing="4">
+                                    <Border Style="{StaticResource Avatar}" HorizontalOptions="Center">
+                                        <Label Text="{x:Static v:Icons.Bolt}" Style="{StaticResource AccentIcon}" />
+                                    </Border>
+                                    <Label Text="Action" Style="{StaticResource Body}" HorizontalTextAlignment="Center" FontFamily="OpenSansSemibold" />
+                                    <Label Text="Relais, lien ou requête" Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Label Style="{StaticResource Caption}"
+                                   Text="Choisissez ci-dessous ce que déclenche chaque type d'appui. Les actions s'exécutent tant que l'application écoute." />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="Types d'appui" Style="{StaticResource Section}" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Programs}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ProgramSlot">
+                                <Border Style="{StaticResource Card}" Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding EditProgramCommand, Source={RelativeSource AncestorType={x:Type vm:ButtonDetailViewModel}}, x:DataType=vm:ButtonDetailViewModel}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                        <Border Style="{StaticResource Avatar}">
+                                            <Label Text="{Binding Visual.Icon}" Style="{StaticResource AccentIcon}" FontSize="22" />
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Visual.Title}" Style="{StaticResource Title}" FontSize="15.5" />
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="5">
+                                                <Label Text="{Binding ActionIcon}" Style="{StaticResource Icon}" FontSize="14">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding HasAction}" Value="True">
+                                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                                <Label Grid.Column="1" Text="{Binding Summary}" Style="{StaticResource Caption}" LineBreakMode="TailTruncation" MaxLines="1" />
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="2" Text="{x:Static v:Icons.ChevronRight}" Style="{StaticResource Icon}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- ===== Appareil ===== -->
+                <VerticalStackLayout IsVisible="{Binding IsDeviceTab}" Spacing="8">
+
+                    <!-- Connexion -->
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Border Style="{StaticResource Avatar}">
+                                    <Label Text="{Binding ConnectionIcon}" Style="{StaticResource Icon}" FontSize="22">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsConnected}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding ConnectionTitle}" Style="{StaticResource Title}" />
+                                    <Label Text="{Binding ConnectionHint}" Style="{StaticResource Caption}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Button Text="Se connecter" Command="{Binding ConnectCommand}" IsVisible="{Binding IsDisconnected}" />
+                            <ActivityIndicator IsRunning="{Binding IsConnecting}" IsVisible="{Binding IsConnecting}" HeightRequest="28" />
+                            <Button Text="Se déconnecter" Style="{StaticResource SecondaryButton}" Command="{Binding DisconnectCommand}" IsVisible="{Binding IsConnected}" />
+                            <Label Text="{Binding Firmware, StringFormat='Firmware {0}'}" Style="{StaticResource Caption}" IsVisible="{Binding IsConnected}" />
+                            <Label Text="{Binding FirmwareWarning}" FontSize="12.5" IsVisible="{Binding FirmwareWarning, Converter={StaticResource HasText}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Réglages (appliqués dès qu'on les change) -->
+                    <VerticalStackLayout IsVisible="{Binding IsConnected}" Spacing="8">
+                        <Label Text="Réglages du bouton" Style="{StaticResource Section}" />
+                        <Border Style="{StaticResource Card}" Padding="16,6">
+                            <VerticalStackLayout>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,10" IsVisible="{Binding IsBuzzerSupported}">
+                                    <VerticalStackLayout Spacing="1">
+                                        <Label Text="Buzzer" Style="{StaticResource SettingTitle}" />
+                                        <Label Text="Bip à chaque appui" Style="{StaticResource Caption}" />
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" IsToggled="{Binding BuzzerEnabled}" />
+                                </Grid>
+                                <BoxView Style="{StaticResource Divider}" IsVisible="{Binding IsBeaconSupported}" />
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,10" IsVisible="{Binding IsBeaconSupported}">
+                                    <VerticalStackLayout Spacing="1">
+                                        <Label Text="Mode balise" Style="{StaticResource SettingTitle}" />
+                                        <Label Text="Émet régulièrement son état ; nécessaire pour le faire sonner, consomme plus de pile" Style="{StaticResource Caption}" />
+                                    </VerticalStackLayout>
+                                    <Switch Grid.Column="1" IsToggled="{Binding BeaconMode}" />
+                                </Grid>
+                                <BoxView Style="{StaticResource Divider}" IsVisible="{Binding IsSpeedSupported}" />
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,10" IsVisible="{Binding IsSpeedSupported}">
+                                    <VerticalStackLayout Spacing="1">
+                                        <Label Text="Délai multi-clic" Style="{StaticResource SettingTitle}" />
+                                        <Label Text="Écart maximal entre deux clics d'un double ou triple appui" Style="{StaticResource Caption}" />
+                                    </VerticalStackLayout>
+                                    <Picker Grid.Column="1" ItemsSource="{Binding Speeds}" SelectedItem="{Binding Speed}" MinimumWidthRequest="100" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label Text="Outils" Style="{StaticResource Section}" />
+                        <Border Style="{StaticResource Card}">
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8" IsVisible="{Binding IsBuzzerSupported}">
+                                    <Button Text="Faire sonner" Style="{StaticResource SecondaryButton}" Command="{Binding RingCommand}" />
+                                    <Button Grid.Column="1" Text="Arrêter" Style="{StaticResource SecondaryButton}" Command="{Binding StopRingCommand}" />
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsTimeSupported}">
+                                    <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                        <Label Text="Horloge du bouton" Style="{StaticResource SettingTitle}" />
+                                        <Label Text="{Binding DeviceTime}" Style="{StaticResource Caption}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="Mettre à l'heure" Style="{StaticResource SecondaryButton}" Command="{Binding SyncTimeCommand}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Sécurité -->
+                    <Label Text="Sécurité" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding Item.SecurityIcon}" Style="{StaticResource AccentIcon}" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                    <Label Text="{Binding Item.SecurityText}" Style="{StaticResource SettingTitle}" />
+                                    <Label Text="{Binding KeyPreview}" Style="{StaticResource Caption}" FontFamily="monospace" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="2" Text="{x:Static v:Icons.Copy}" FontFamily="Icons" FontSize="18" Style="{StaticResource SecondaryButton}"
+                                        WidthRequest="40" HeightRequest="40" Padding="0" IsVisible="{Binding HasKey}"
+                                        Command="{Binding CopyKeyCommand}" SemanticProperties.Description="Copier la clé" />
+                            </Grid>
+                            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsConnected}">
+                                <BoxView Style="{StaticResource Divider}" />
+                                <Label Text="Chiffrer les appuis : choisissez un code PIN (6 chiffres max.). La clé générée est lue et enregistrée automatiquement." Style="{StaticResource Caption}" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Border Style="{StaticResource Field}">
+                                        <Entry Text="{Binding Passkey}" Placeholder="Code PIN" Keyboard="Numeric" MaxLength="6" />
+                                    </Border>
+                                    <Button Grid.Column="1" Text="Activer" Command="{Binding EnableEncryptionCommand}" />
+                                </Grid>
+                                <Button Text="Relire la clé sur le bouton" Style="{StaticResource SecondaryButton}" Command="{Binding ReadKeyCommand}" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Avancé : identité saisie à la main -->
+                    <Label Text="Avancé" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Adresse MAC" Style="{StaticResource SettingTitle}" />
+                            <Border Style="{StaticResource Field}">
+                                <Entry Text="{Binding MacText}" Placeholder="AA:BB:CC:DD:EE:FF" FontFamily="monospace" />
+                            </Border>
+                            <Label Text="Clé de chiffrement" Style="{StaticResource SettingTitle}" Margin="0,4,0,0" />
+                            <Border Style="{StaticResource Field}">
+                                <Entry Text="{Binding KeyText}" Placeholder="32 caractères hexadécimaux" FontFamily="monospace" IsPassword="True" />
+                            </Border>
+                            <Label Text="Utile si la clé vient d'ailleurs (application officielle) ou pour déchiffrer sur iPhone." Style="{StaticResource Caption}" />
+                            <Button Text="Enregistrer" Style="{StaticResource SecondaryButton}" Command="{Binding SaveIdentityCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Zone de danger -->
+                    <Label Text="Zone de danger" Style="{StaticResource Section}" />
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="8">
+                            <Button Text="Réinitialisation usine du bouton" Style="{StaticResource DangerButton}" Command="{Binding FactoryResetCommand}" IsVisible="{Binding IsConnected}" />
+                            <Button Text="Oublier ce bouton dans l'application" Style="{StaticResource DangerButton}" Command="{Binding ForgetCommand}" IsVisible="{Binding Item.IsSaved}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Style="{StaticResource Caption}" HorizontalTextAlignment="Center" Margin="0,8"
+                       Text="Application non officielle, issue de rétro-ingénierie. Sans lien avec Shelly / Allterco." />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

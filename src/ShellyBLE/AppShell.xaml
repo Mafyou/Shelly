@@ -1,0 +1,22 @@
+<Shell
+    x:Class="ShellyBLE.AppShell"
+    xmlns:views="clr-namespace:ShellyBLE.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.BackgroundColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}"
+    Shell.ForegroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+    Shell.TitleColor="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"
+    Title="ShellyBLE">
+
+    <!-- Barre d'état assortie au fond de l'application -->
+    <Shell.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}"
+                                   StatusBarStyle="{AppThemeBinding Light=DarkContent, Dark=LightContent}" />
+    </Shell.Behaviors>
+
+    <ShellContent
+        Title="Boutons BLU"
+        ContentTemplate="{DataTemplate views:ButtonsPage}"
+        Route="buttons" />
+
+</Shell>

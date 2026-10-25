@@ -1,0 +1,144 @@
+﻿<Application xmlns:local="clr-namespace:ShellyBLE"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="ShellyBLE.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <toolkit:InvertedBoolConverter x:Key="Not" />
+            <toolkit:IsStringNotNullOrEmptyConverter x:Key="HasText" />
+            <toolkit:IsNotNullConverter x:Key="IsSet" />
+
+            <!-- Palette sémantique (clair / sombre) -->
+            <Color x:Key="BackgroundLight">#F4F6FA</Color>
+            <Color x:Key="BackgroundDark">#0E1117</Color>
+            <Color x:Key="SurfaceLight">#FFFFFF</Color>
+            <Color x:Key="SurfaceDark">#161B22</Color>
+            <Color x:Key="SurfaceAltLight">#EEF2F8</Color>
+            <Color x:Key="SurfaceAltDark">#1F2630</Color>
+            <Color x:Key="BorderLight">#E1E6EE</Color>
+            <Color x:Key="BorderDark">#2A313C</Color>
+            <Color x:Key="TextLight">#111827</Color>
+            <Color x:Key="TextDark">#E6EDF3</Color>
+            <Color x:Key="MutedLight">#5F6B7A</Color>
+            <Color x:Key="MutedDark">#8B96A5</Color>
+            <Color x:Key="SuccessLight">#1E7B34</Color>
+            <Color x:Key="SuccessDark">#3FB950</Color>
+            <Color x:Key="WarningLight">#9A6700</Color>
+            <Color x:Key="WarningDark">#D29922</Color>
+            <Color x:Key="DangerLight">#C62828</Color>
+            <Color x:Key="DangerDark">#F85149</Color>
+
+            <!-- Pages -->
+            <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}" />
+            </Style>
+
+            <!-- Texte -->
+            <Style x:Key="Display" TargetType="Label">
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+            </Style>
+            <Style x:Key="Title" TargetType="Label">
+                <Setter Property="FontSize" Value="17" />
+                <Setter Property="FontFamily" Value="OpenSansSemibold" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+            </Style>
+            <Style x:Key="Body" TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+            </Style>
+            <Style x:Key="Caption" TargetType="Label">
+                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+            </Style>
+            <Style x:Key="Section" TargetType="Label">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontFamily" Value="OpenSansSemibold" />
+                <Setter Property="TextTransform" Value="Uppercase" />
+                <Setter Property="CharacterSpacing" Value="1" />
+                <Setter Property="Margin" Value="4,8,0,4" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+            </Style>
+            <Style x:Key="Mono" TargetType="Label">
+                <Setter Property="FontFamily" Value="monospace" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+            </Style>
+
+            <!-- Icônes (Material Design Icons) -->
+            <Style x:Key="Icon" TargetType="Label">
+                <Setter Property="FontFamily" Value="Icons" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}" />
+            </Style>
+            <Style x:Key="AccentIcon" TargetType="Label" BasedOn="{StaticResource Icon}">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            </Style>
+
+            <!-- Conteneurs -->
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}" />
+            </Style>
+            <Style x:Key="Avatar" TargetType="Border">
+                <Setter Property="WidthRequest" Value="44" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="StrokeThickness" Value="0" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 22" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}" />
+            </Style>
+            <Style x:Key="Chip" TargetType="Border">
+                <Setter Property="Padding" Value="8,3" />
+                <Setter Property="StrokeThickness" Value="0" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}" />
+            </Style>
+            <Style x:Key="ChipIcon" TargetType="Label" BasedOn="{StaticResource Icon}">
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <Style x:Key="ChipText" TargetType="Label" BasedOn="{StaticResource Caption}">
+                <Setter Property="VerticalTextAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="Divider" TargetType="BoxView">
+                <Setter Property="HeightRequest" Value="1" />
+                <Setter Property="Margin" Value="0,4" />
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+            </Style>
+
+            <!-- Boutons -->
+            <Style x:Key="SecondaryButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                <Setter Property="CornerRadius" Value="10" />
+            </Style>
+            <Style x:Key="DangerButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                <Setter Property="CornerRadius" Value="10" />
+            </Style>
+
+            <!-- Saisie -->
+            <Style x:Key="Field" TargetType="Border">
+                <Setter Property="Padding" Value="12,2" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

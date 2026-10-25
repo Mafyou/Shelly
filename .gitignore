@@ -1,0 +1,32 @@
+# Sorties de build
+bin/
+obj/
+artifacts/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# Tests
+TestResults/
+*.trx
+coverage*/
+
+# Paquets et livrables : l'APK se publie dans les Releases GitHub
+*.apk
+*.aab
+*.keystore
+*.jks
+release/
+
+# Captures et journaux de diagnostic (peuvent contenir des données d'appareil)
+*.btsnoop
+btsnoop_hci.log
+bugreport*.zip
+
+# Système
+.DS_Store
+Thumbs.db
