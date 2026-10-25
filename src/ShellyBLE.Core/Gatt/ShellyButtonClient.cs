@@ -80,6 +80,19 @@ public sealed class ShellyButtonClient(IGattChannel channel, TimeProvider? time 
         return now;
     }
 
+    /// <summary>Écart d'horloge au-delà duquel la connexion remet le bouton à l'heure.</summary>
+    public static readonly TimeSpan ClockTolerance = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Remet l'horloge à l'heure si elle dérive : elle repart de 1970 à chaque redémarrage du bouton,
+    /// et elle sert de compteur au chiffrement. Renvoie la nouvelle heure, ou null si rien n'a été écrit
+    /// (horloge juste, ou absente du firmware).
+    /// </summary>
+    public async Task<DateTimeOffset?> SyncTimeIfDriftedAsync(ButtonDeviceSettings settings, CancellationToken stoppingToken = default) =>
+        settings.DeviceTime is { } clock && (clock - time.GetUtcNow()).Duration() > ClockTolerance
+            ? await SyncTimeAsync(stoppingToken)
+            : null;
+
     /// <summary>Définit le code PIN, ce qui active le chiffrement et régénère la clé, puis lit la nouvelle clé.</summary>
     public async Task<ImmutableArray<byte>> EnableEncryptionAsync(int passkey, CancellationToken stoppingToken = default)
     {

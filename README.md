@@ -92,6 +92,11 @@ Par connexion Bluetooth, le bouton expose : faire sonner, activer/couper le buzz
 
 Une fois un code PIN défini, les appuis sont chiffrés (standard BTHome, AES). L'application lit la clé sur le bouton et déchiffre les appuis. Curiosité : le compteur anti-rejeu des messages chiffrés est simplement l'horloge du bouton.
 
+Ce choix a deux conséquences, observées en 1.0.2 :
+
+- **L'horloge repart de zéro à chaque redémarrage** (changement de code PIN, pile retirée). Les messages sont alors datés de 1970 tant que l'horloge n'a pas été remise à l'heure ; l'application le fait à chaque connexion.
+- **Le compteur se fige** : en mode appairage, il vaut toujours 0 ; en mode balise, le message répété toutes les 8 secondes garde le compteur de sa création. Avec la même clé, le même compteur produit le même flux de chiffrement : il a suffi de connaître le contenu, prévisible, d'un message d'appairage pour déchiffrer un double appui émis en mode appairage, **sans la clé**. Le chiffrement de ce firmware protège donc mal les appuis faits en mode appairage ; une raison de plus de mettre le bouton à jour.
+
 ### Les caprices du firmware 1.0.2
 
 - Un téléphone non associé qui tente un réglage ne reçoit pas d'erreur : le bouton coupe la connexion. Il faut donc s'associer avant.
@@ -104,7 +109,8 @@ Shelly a corrigé une bonne partie de ces comportements dans les versions suivan
 ### Les pièges côté Android
 
 - **Localisation coupée** : par défaut, Android cache tous les appareils Bluetooth aux applications. L'application déclare qu'elle n'utilise pas le Bluetooth pour localiser, ce qui lève ce blocage.
-- **Écran éteint** : Android n'écoute plus que par intermittence et seulement pour des appareils précis. D'où le filtrage sur les boutons Shelly et la notification permanente ; même ainsi, un appui très bref peut passer entre deux écoutes.
+- **Écran éteint** : Android n'écoute plus que par intermittence et seulement pour des appareils précis. D'où le filtrage sur les boutons Shelly et la notification permanente ; même ainsi, un appui très bref peut passer entre deux écoutes. Mesuré : environ 3 messages d'appairage sur 4 arrivent écran éteint.
+- **Le tri fait par la puce Bluetooth** : le filtre « messages BTHome » est appliqué par la puce elle-même, et sur ce téléphone il laisse passer les messages de balise et d'appairage mais pas ceux des appuis, écran allumé comme éteint. Seul le filtre par adresse les laisse passer : l'application ajoute donc l'adresse de chaque bouton dès qu'elle l'a aperçu une fois (balise ou mode appairage).
 - **« Ça marche branché, pas débranché »** : avec l'option développeur « Rester activé », l'écran ne s'éteint jamais quand le téléphone charge. Le problème d'écran éteint n'apparaissait donc qu'une fois débranché.
 
 ---

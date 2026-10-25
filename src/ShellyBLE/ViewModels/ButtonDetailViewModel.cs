@@ -246,6 +246,8 @@ public sealed partial class ButtonDetailViewModel(ButtonsService buttons, BleSca
             Show(deviceSettings = await client.ReadSettingsAsync(timeout.Token));
             if (client is { } connected)
             {
+                if (await connected.SyncTimeIfDriftedAsync(deviceSettings, timeout.Token) is { } synced)
+                    DeviceTime = $"{synced.ToLocalTime():G}";
                 Connection = ConnectionState.Connected;
                 _ = KeepAliveAsync(connected);
             }

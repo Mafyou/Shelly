@@ -156,6 +156,43 @@ public class ShellyButtonClientTests
         channel.Verify(c => c.WriteAsync(ShellyGatt.Service, ShellyGatt.UnixTime, Bytes(0x20, 0x4E, 0xFB, 0x68), true, It.IsAny<CancellationToken>()));
     }
 
+    /// <summary>Cas réel : après un redémarrage, l'horloge repart de 1970.</summary>
+    [Fact]
+    public async Task Resyncs_a_clock_reset_by_a_reboot()
+    {
+        var now = DateTimeOffset.FromUnixTimeSeconds(1_761_300_000);
+        time.Setup(t => t.GetUtcNow()).Returns(now);
+        SetupWrite(ShellyGatt.UnixTime);
+
+        var synced = await client.SyncTimeIfDriftedAsync(SettingsWithClock(DateTimeOffset.FromUnixTimeSeconds(10)), StoppingToken);
+
+        synced.ShouldBe(now);
+        channel.Verify(c => c.WriteAsync(ShellyGatt.Service, ShellyGatt.UnixTime, Bytes(0x20, 0x4E, 0xFB, 0x68), true, It.IsAny<CancellationToken>()));
+    }
+
+    [Theory]
+    [InlineData(30)]
+    [InlineData(-30)]
+    public async Task Leaves_a_clock_within_tolerance_untouched(int driftSeconds)
+    {
+        var now = DateTimeOffset.FromUnixTimeSeconds(1_761_300_000);
+        time.Setup(t => t.GetUtcNow()).Returns(now);
+
+        var synced = await client.SyncTimeIfDriftedAsync(SettingsWithClock(now.AddSeconds(driftSeconds)), StoppingToken);
+
+        synced.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task Never_writes_a_clock_the_firmware_does_not_have()
+    {
+        var synced = await client.SyncTimeIfDriftedAsync(SettingsWithClock(null), StoppingToken);
+
+        synced.ShouldBeNull();
+    }
+
+    static ButtonDeviceSettings SettingsWithClock(DateTimeOffset? clock) => new(null, true, true, null, clock);
+
     [Theory]
     [InlineData(true, 1)]
     [InlineData(false, 0)]
