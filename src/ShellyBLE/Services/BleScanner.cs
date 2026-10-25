@@ -11,6 +11,7 @@ public sealed class BleScanner
     readonly IBluetoothLE bluetooth;
     readonly IButtonSettingsStore settings;
     readonly ILogger<BleScanner> logger;
+    readonly HashSet<MacAddress> watched = [];
     CancellationTokenSource? scan;
     int advertisementCount;
     int shellyCount;
@@ -40,6 +41,9 @@ public sealed class BleScanner
     /// <summary>Scan filtré (Android) : seules les annonces Shelly/BTHome remontent.</summary>
     public bool IsFiltered { get; private set; }
 
+    /// <summary>Diagnostic : scan sans aucun filtre, écran allumé uniquement (Android le suspend écran éteint).</summary>
+    public bool IsRawScan { get; set; }
+
     /// <summary>Annonces BLE reçues depuis le démarrage, tous appareils confondus (diagnostic).</summary>
     public int AdvertisementCount => Volatile.Read(ref advertisementCount);
 
@@ -57,7 +61,7 @@ public sealed class BleScanner
 
         scan = new();
         LastError = null;
-        IsFiltered = DeviceInfo.Platform == DevicePlatform.Android;
+        IsFiltered = DeviceInfo.Platform == DevicePlatform.Android && !IsRawScan;
 #if ANDROID
         ScanForegroundService.Start();
 #endif
@@ -111,16 +115,29 @@ public sealed class BleScanner
     /// Un appui n'émet pas de réponse au scan : le nom et les données BTHome sont les plus sûrs.
     /// </summary>
     /// <remarks>
-    /// Constaté (OnePlus 7 Pro) : écran éteint, les trames d'appui (données BTHome seules) ne passent pas le
-    /// filtre de données de service, appliqué par le contrôleur. Le filtre par adresse, lui, est géré partout :
-    /// on l'ajoute pour chaque bouton enregistré.
+    /// Constaté (OnePlus 7 Pro), écran allumé comme éteint : les trames d'appui ne passent pas le filtre de
+    /// données de service, appliqué par le contrôleur. Seules les trames portant les données constructeur
+    /// (balise, mode appairage) et le filtre par adresse passent. On filtre donc aussi sur l'adresse de chaque
+    /// bouton enregistré ou déjà aperçu.
     /// </remarks>
     ScanFilterOptions Filters() => new()
     {
         ServiceDataFilters = [new(BTHomeParser.ServiceGuid, [], [])],
         ManufacturerDataFilters = [new(ShellyManufacturerData.AlltercoCompanyId, [], [])],
-        DeviceAddresses = [.. settings.All.Select(s => s.ParsedMac).OfType<MacAddress>().Select(mac => $"{mac}")],
+        DeviceAddresses = [.. settings.All.Select(s => s.ParsedMac).OfType<MacAddress>().Union(watched).Select(mac => $"{mac}")],
     };
+
+    /// <summary>
+    /// Ajoute un bouton aperçu au filtre par adresse, pour recevoir ensuite ses trames d'appui.
+    /// Relance le scan si l'adresse est nouvelle (thread UI).
+    /// </summary>
+    public async Task WatchAsync(MacAddress mac)
+    {
+        if (!watched.Add(mac) || !IsFiltered || settings.All.Any(s => s.ParsedMac == mac))
+            return;
+        logger.LogInformation("Filtre par adresse : {Mac} ajouté, relance du scan", mac);
+        await RestartAsync();
+    }
 
     /// <summary>Relance le scan pour prendre en compte un bouton nouvellement enregistré (filtre par adresse).</summary>
     public async Task RestartAsync()

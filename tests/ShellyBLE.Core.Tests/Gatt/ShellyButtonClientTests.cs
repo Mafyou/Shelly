@@ -135,6 +135,16 @@ public class ShellyButtonClientTests
     }
 
     [Fact]
+    public async Task Reads_the_sample_BTHome_frame_as_is()
+    {
+        SetupRead(ShellyGatt.SampleBTHomeData, [0x44, 0x00, 0x01, 0x01, 0x64, 0x3A, 0x01]);
+
+        var sample = await client.ReadSampleBTHomeDataAsync(StoppingToken);
+
+        sample.ShouldBe([0x44, 0x00, 0x01, 0x01, 0x64, 0x3A, 0x01]);
+    }
+
+    [Fact]
     public async Task Syncs_device_clock_with_current_time()
     {
         var now = DateTimeOffset.FromUnixTimeSeconds(1_761_300_000);

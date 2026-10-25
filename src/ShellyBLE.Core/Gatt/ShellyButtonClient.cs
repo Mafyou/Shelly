@@ -95,6 +95,10 @@ public sealed class ShellyButtonClient(IGattChannel channel, TimeProvider? time 
             : throw new GattException($"Clé de {key.Length} octets reçue, {BTHomeCipher.KeyLength} attendus.");
     }
 
+    /// <summary>Exemple de trame BTHome telle que l'appareil la diffuserait (charge utile des données de service).</summary>
+    public Task<ImmutableArray<byte>> ReadSampleBTHomeDataAsync(CancellationToken stoppingToken = default) =>
+        Read(ShellyGatt.SampleBTHomeData, stoppingToken);
+
     /// <summary>Efface les appairages et désactive le chiffrement. L'appareil redémarre sans répondre.</summary>
     public Task FactoryResetAsync(CancellationToken stoppingToken = default) =>
         channel.WriteAsync(ShellyGatt.Service, ShellyGatt.FactoryReset, [1], withResponse: false, stoppingToken);

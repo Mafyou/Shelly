@@ -63,6 +63,7 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
             "time" => $"{await Client.SyncTimeAsync(stoppingToken):O}",
             "key" => Convert.ToHexStringLower((await Client.ReadEncryptionKeyAsync(stoppingToken)).AsSpan()),
             "prov" => await Client.ReadProvisioningDataAsync(stoppingToken) ?? "(vide)",
+            "sample" => Describe(await Client.ReadSampleBTHomeDataAsync(stoppingToken)),
             "wait" => await WaitAsync(argument, stoppingToken),
             "disconnect" => await DisconnectAsync(),
             "actions" => await SaveActionsAsync(argument ?? throw new ArgumentException("URL de base attendue.")),
@@ -71,6 +72,7 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
             "clearkey" => await SaveKeyAsync(null),
             "reset" => await FactoryResetAsync(stoppingToken),
             "status" => Status(),
+            "rawscan" => await RawScanAsync(argument != "0"),
             "waitbutton" => await WaitForButtonAsync(),
             _ => throw new ArgumentException($"Étape inconnue : {name}"),
         };
@@ -135,6 +137,13 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
         throw new TimeoutException("Aucun bouton en 3 min.");
     }
 
+    async Task<string> RawScanAsync(bool raw)
+    {
+        scanner.IsRawScan = raw;
+        await scanner.RestartAsync();
+        return raw ? "scan sans filtre" : "scan filtré";
+    }
+
     string Status()
     {
         var item = Target;
@@ -148,6 +157,12 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
         await Client.ApplySettingsAsync(current, desired, stoppingToken);
         return $"{desired}";
     }
+
+    static string Describe(ImmutableArray<byte> payload) => $"{Convert.ToHexString(payload.AsSpan())} → {BTHomeParser.Parse(payload.AsSpan()) switch
+    {
+        BTHomePacket packet => string.Join(" ", packet.Objects.Select(o => $"{o}")),
+        BTHomeError error => $"{error}",
+    }}";
 
     static async Task<string> DoAsync(Task operation)
     {
