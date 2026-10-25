@@ -18,10 +18,10 @@ jobs:
     name: Core (tests)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # SDK préversion épinglé par global.json.
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
@@ -30,14 +30,12 @@ jobs:
 
   android:
     name: Android (build)
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: pwsh
+    # Sous Linux, le projet ne cible qu'Android : pas besoin des workloads iOS / Mac Catalyst.
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
@@ -47,9 +45,9 @@ jobs:
       - run: >
           dotnet build src/ShellyBLE/ShellyBLE.csproj -f net11.0-android
           -t:InstallAndroidDependencies
-          -p:AndroidSdkDirectory="$env:ANDROID_SDK_ROOT"
+          -p:AndroidSdkDirectory="$ANDROID_SDK_ROOT"
           -p:AcceptAndroidSDKLicenses=True
 
       - run: >
           dotnet build src/ShellyBLE/ShellyBLE.csproj -f net11.0-android -c Release
-          -p:AndroidSdkDirectory="$env:ANDROID_SDK_ROOT"
+          -p:AndroidSdkDirectory="$ANDROID_SDK_ROOT"
