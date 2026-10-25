@@ -183,6 +183,18 @@ public class ShellyButtonClientTests
         synced.ShouldBeNull();
     }
 
+    /// <summary>Le compteur de chiffrement reculerait : des nonces déjà émis seraient réutilisés.</summary>
+    [Fact]
+    public async Task Never_rewinds_a_clock_that_is_ahead()
+    {
+        var now = DateTimeOffset.FromUnixTimeSeconds(1_761_300_000);
+        time.Setup(t => t.GetUtcNow()).Returns(now);
+
+        var synced = await client.SyncTimeIfDriftedAsync(SettingsWithClock(now.AddHours(2)), StoppingToken);
+
+        synced.ShouldBeNull();
+    }
+
     [Fact]
     public async Task Never_writes_a_clock_the_firmware_does_not_have()
     {

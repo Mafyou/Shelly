@@ -70,6 +70,7 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
             "encrypt" => await EncryptAsync(argument, stoppingToken),
             "savekey" => await SaveKeyAsync(await Client.ReadEncryptionKeyAsync(stoppingToken)),
             "clearkey" => await SaveKeyAsync(null),
+            "setkey" => await SaveKeyAsync(ParseKey(argument)),
             "reset" => await FactoryResetAsync(stoppingToken),
             "status" => Status(),
             "rawscan" => await RawScanAsync(argument != "0"),
@@ -110,6 +111,12 @@ public sealed class DebugAutomation(BleScanner scanner, ButtonsService buttons, 
             throw new ArgumentException("PIN numérique attendu.");
         return await SaveKeyAsync(await Client.EnableEncryptionAsync(passkey, stoppingToken));
     }
+
+    /// <summary>Clé fournie en hexadécimal (32 caractères), pour un téléphone qui ne peut pas la relire sur le bouton.</summary>
+    static ImmutableArray<byte> ParseKey(string? hex) =>
+        hex is { Length: BTHomeCipher.KeyLength * 2 } && Convert.FromHexString(hex) is { } bytes
+            ? ImmutableCollectionsMarshal.AsImmutableArray(bytes)
+            : throw new ArgumentException($"Clé de {BTHomeCipher.KeyLength * 2} caractères hexadécimaux attendue.");
 
     async Task<string> SaveKeyAsync(ImmutableArray<byte>? key)
     {

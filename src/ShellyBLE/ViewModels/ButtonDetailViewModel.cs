@@ -248,8 +248,12 @@ public sealed partial class ButtonDetailViewModel(ButtonsService buttons, BleSca
             {
                 if (await connected.SyncTimeIfDriftedAsync(deviceSettings, timeout.Token) is { } synced)
                     DeviceTime = $"{synced.ToLocalTime():G}";
-                Connection = ConnectionState.Connected;
-                _ = KeepAliveAsync(connected);
+                // La page a pu se déconnecter pendant la mise à l'heure : ne pas ressusciter l'état connecté.
+                if (ReferenceEquals(client, connected))
+                {
+                    Connection = ConnectionState.Connected;
+                    _ = KeepAliveAsync(connected);
+                }
             }
         }
         catch (Exception ex)

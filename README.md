@@ -97,6 +97,16 @@ Ce choix a deux conséquences, observées en 1.0.2 :
 - **L'horloge repart de zéro à chaque redémarrage** (changement de code PIN, pile retirée). Les messages sont alors datés de 1970 tant que l'horloge n'a pas été remise à l'heure ; l'application le fait à chaque connexion.
 - **Le compteur se fige** : en mode appairage, il vaut toujours 0 ; en mode balise, le message répété toutes les 8 secondes garde le compteur de sa création. Avec la même clé, le même compteur produit le même flux de chiffrement : il a suffi de connaître le contenu, prévisible, d'un message d'appairage pour déchiffrer un double appui émis en mode appairage, **sans la clé**. Le chiffrement de ce firmware protège donc mal les appuis faits en mode appairage ; une raison de plus de mettre le bouton à jour.
 
+### Un appui, vu de la radio
+
+Un appui produit une rafale d'environ une seconde : le même message répété toutes les 45 ms environ. Il porte, comme la balise, les données Shelly (modèle, adresse) et un octet d'état : `0x01` pour un appui, `0x09` en mode balise, `0x19` en mode appairage.
+
+### Le piège de la pile faible
+
+C'est le problème qui a coûté le plus de temps, parce qu'il ressemble à un défaut de réception. Avec la pile d'origine descendue vers 32 %, le bouton bipait et clignotait à chaque appui, mais **n'émettait aucun message**. Il perdait aussi toute connexion au bout de quelques secondes et repassait de lui-même en mode appairage. En réalité, il redémarrait : le numéro de paquet retombait à 1 et l'horloge à 1970. Avec une pile neuve (74 %), les appuis chiffrés sont arrivés du premier coup, écran allumé comme éteint.
+
+Si les appuis n'arrivent plus alors que le bouton bipe : **changer la pile** avant toute autre recherche.
+
 ### Les caprices du firmware 1.0.2
 
 - Un téléphone non associé qui tente un réglage ne reçoit pas d'erreur : le bouton coupe la connexion. Il faut donc s'associer avant.
@@ -109,8 +119,7 @@ Shelly a corrigé une bonne partie de ces comportements dans les versions suivan
 ### Les pièges côté Android
 
 - **Localisation coupée** : par défaut, Android cache tous les appareils Bluetooth aux applications. L'application déclare qu'elle n'utilise pas le Bluetooth pour localiser, ce qui lève ce blocage.
-- **Écran éteint** : Android n'écoute plus que par intermittence et seulement pour des appareils précis. D'où le filtrage sur les boutons Shelly et la notification permanente ; même ainsi, un appui très bref peut passer entre deux écoutes. Mesuré : environ 3 messages d'appairage sur 4 arrivent écran éteint.
-- **Le tri fait par la puce Bluetooth** : le filtre « messages BTHome » est appliqué par la puce elle-même, et sur ce téléphone il laisse passer les messages de balise et d'appairage mais pas ceux des appuis, écran allumé comme éteint. Seul le filtre par adresse les laisse passer : l'application ajoute donc l'adresse de chaque bouton dès qu'elle l'a aperçu une fois (balise ou mode appairage).
+- **Écran éteint** : Android n'écoute plus que par intermittence et seulement pour des appareils précis. D'où le filtrage sur les boutons Shelly et la notification permanente. Un appui reste bien visible : avec une pile neuve, un appui fait écran éteint est arrivé sous forme de 22 messages en une seconde.
 - **« Ça marche branché, pas débranché »** : avec l'option développeur « Rester activé », l'écran ne s'éteint jamais quand le téléphone charge. Le problème d'écran éteint n'apparaissait donc qu'une fois débranché.
 
 ---
