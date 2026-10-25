@@ -12,7 +12,9 @@ public sealed class BleScanner
     readonly IButtonSettingsStore settings;
     readonly ILogger<BleScanner> logger;
     readonly HashSet<MacAddress> watched = [];
+    readonly ScanStartBudget budget = new();
     CancellationTokenSource? scan;
+    bool restartPending;
     int advertisementCount;
     int shellyCount;
 
@@ -60,6 +62,7 @@ public sealed class BleScanner
             return;
 
         scan = new();
+        budget.Record();
         LastError = null;
         IsFiltered = DeviceInfo.Platform == DevicePlatform.Android && !IsRawScan;
 #if ANDROID
@@ -139,13 +142,34 @@ public sealed class BleScanner
         await RestartAsync();
     }
 
-    /// <summary>Relance le scan pour prendre en compte un bouton nouvellement enregistré (filtre par adresse).</summary>
+    /// <summary>
+    /// Relance le scan pour prendre en compte de nouvelles adresses (thread UI). Les demandes rapprochées
+    /// sont regroupées en une seule relance, retardée si le quota de démarrages d'Android est atteint.
+    /// </summary>
     public async Task RestartAsync()
     {
-        if (!IsScanning)
+        if (!IsScanning || restartPending)
             return;
-        await StopAsync();
-        Start();
+
+        restartPending = true;
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            var wait = budget.WaitBeforeNextStart();
+            if (wait > TimeSpan.Zero)
+            {
+                logger.LogInformation("Quota de scans atteint : relance dans {Wait:0} s", wait.TotalSeconds);
+                await Task.Delay(wait);
+            }
+            if (!IsScanning)
+                return;
+            await StopAsync();
+            Start();
+        }
+        finally
+        {
+            restartPending = false;
+        }
     }
 
     void OnDevice(object? sender, DeviceEventArgs e)
