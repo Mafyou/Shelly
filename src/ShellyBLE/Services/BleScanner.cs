@@ -115,10 +115,10 @@ public sealed class BleScanner
     /// Un appui n'émet pas de réponse au scan : le nom et les données BTHome sont les plus sûrs.
     /// </summary>
     /// <remarks>
-    /// Constaté (OnePlus 7 Pro), écran allumé comme éteint : les trames d'appui ne passent pas le filtre de
-    /// données de service, appliqué par le contrôleur. Seules les trames portant les données constructeur
-    /// (balise, mode appairage) et le filtre par adresse passent. On filtre donc aussi sur l'adresse de chaque
-    /// bouton enregistré ou déjà aperçu.
+    /// Les trames d'appui du BLU Button1 portent aussi les données constructeur (octet d'état 0x01) : le filtre
+    /// constructeur suffit pour lui. Le filtre par adresse, géré par tous les contrôleurs, couvre en plus les
+    /// appareils BTHome dont le filtre de données de service serait mal appliqué par la puce : on y ajoute
+    /// chaque bouton enregistré ou déjà aperçu.
     /// </remarks>
     ScanFilterOptions Filters() => new()
     {
